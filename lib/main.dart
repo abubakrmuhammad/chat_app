@@ -32,7 +32,11 @@ class MyApp extends StatelessWidget {
                 ),
               ),
             ),
-            home: const AuthScreen(),
+            home: snapshot.connectionState == ConnectionState.waiting
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : const AuthScreen(),
           );
         });
   }

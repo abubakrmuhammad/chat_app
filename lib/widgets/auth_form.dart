@@ -1,7 +1,19 @@
 import 'package:flutter/material.dart';
 
 class AuthForm extends StatefulWidget {
-  const AuthForm({Key? key}) : super(key: key);
+  final void Function({
+    required String email,
+    required String username,
+    required String password,
+    required bool isLogin,
+  }) submitForm;
+  final bool isLoading;
+
+  const AuthForm({
+    required this.submitForm,
+    required this.isLoading,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<AuthForm> createState() => _AuthFormState();
@@ -22,6 +34,13 @@ class _AuthFormState extends State<AuthForm> {
 
     if (isValid) {
       _formKey.currentState!.save();
+
+      widget.submitForm(
+        email: _email.trim(),
+        username: _username.trim(),
+        password: _password,
+        isLogin: _isLogin,
+      );
     }
   }
 
@@ -33,6 +52,7 @@ class _AuthFormState extends State<AuthForm> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Form(
+            key: _formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -78,20 +98,29 @@ class _AuthFormState extends State<AuthForm> {
                   onSaved: (newValue) => _password = newValue!,
                 ),
                 const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: () {},
-                  child: Text(_isLogin ? 'Login' : 'Create Account'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _isLogin = !_isLogin;
-                    });
-                  },
-                  child: Text(_isLogin
-                      ? 'Create new account'
-                      : 'Already have an account?'),
-                ),
+                if (widget.isLoading)
+                  const SizedBox(
+                    height: 60,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                if (!widget.isLoading)
+                  ElevatedButton(
+                    onPressed: () {
+                      _submitHandler();
+                    },
+                    child: Text(_isLogin ? 'Login' : 'Create Account'),
+                  ),
+                if (!widget.isLoading)
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _isLogin = !_isLogin;
+                      });
+                    },
+                    child: Text(_isLogin
+                        ? 'Create new account'
+                        : 'Already have an account?'),
+                  ),
               ],
             ),
           ),

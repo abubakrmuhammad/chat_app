@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 import 'package:chat_app/widgets/auth_form.dart';
@@ -23,6 +26,7 @@ class _AuthScreenState extends State<AuthScreen> {
     required String username,
     required String password,
     required bool isLogin,
+    required File image,
   }) async {
     final UserCredential userCredential;
 
@@ -45,12 +49,22 @@ class _AuthScreenState extends State<AuthScreen> {
         final newUser = userCredential.user;
 
         if (newUser != null) {
+          final imageRef = FirebaseStorage.instance
+              .ref()
+              .child('user_images')
+              .child('${newUser.uid}.jpg');
+
+          await imageRef.putFile(image);
+
+          final imageUrl = await imageRef.getDownloadURL();
+
           await FirebaseFirestore.instance
               .collection('users')
               .doc(newUser.uid)
               .set({
             'username': username,
             'email': email,
+            'imageUrl': imageUrl,
           });
         }
       }
@@ -77,12 +91,16 @@ class _AuthScreenState extends State<AuthScreen> {
           break;
       }
 
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
       ScaffoldMessenger.of(context).showSnackBar(
-        _ErrorSnackBar(text: message, context: context),
+        AuthErrorSnackBar(text: message, context: context),
       );
     } catch (e) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
       ScaffoldMessenger.of(context).showSnackBar(
-        _ErrorSnackBar(text: 'Something went wrong', context: context),
+        AuthErrorSnackBar(text: 'Something went wrong', context: context),
       );
     } finally {
       setState(() {
@@ -112,8 +130,8 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 }
 
-class _ErrorSnackBar extends SnackBar {
-  _ErrorSnackBar({
+class AuthErrorSnackBar extends SnackBar {
+  AuthErrorSnackBar({
     Key? key,
     required this.text,
     required this.context,

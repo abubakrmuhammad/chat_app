@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import './firebase_options.dart';
 
 import 'package:chat_app/screens/auth_screen.dart';
+import 'package:chat_app/screens/chat_screen.dart';
 
 void main() async {
   runApp(const MyApp());
@@ -36,8 +38,23 @@ class MyApp extends StatelessWidget {
                 ? const Center(
                     child: CircularProgressIndicator(),
                   )
-                : const AuthScreen(),
+                : const HomeScreenWrapper(),
           );
         });
+  }
+}
+
+class HomeScreenWrapper extends StatelessWidget {
+  const HomeScreenWrapper({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, userSnapshot) {
+        if (!userSnapshot.hasData) return const AuthScreen();
+        return const ChatScreen();
+      },
+    );
   }
 }

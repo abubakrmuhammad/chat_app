@@ -10,7 +10,7 @@ class AuthForm extends StatefulWidget {
     required String username,
     required String password,
     required bool isLogin,
-    required File image,
+    required File? image,
   }) submitForm;
   final bool isLoading;
 
@@ -39,7 +39,7 @@ class _AuthFormState extends State<AuthForm> {
   }
 
   void _submitHandler() {
-    final isValid = _formKey.currentState!.validate() && _userImage != null;
+    final isValid = _formKey.currentState!.validate();
     FocusScope.of(context).unfocus();
 
     if (!_isLogin && _userImage == null) {
@@ -59,7 +59,7 @@ class _AuthFormState extends State<AuthForm> {
         email: _email.trim(),
         username: _username.trim(),
         password: _password,
-        image: _userImage!,
+        image: _userImage,
         isLogin: _isLogin,
       );
     }

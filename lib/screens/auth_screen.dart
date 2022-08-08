@@ -26,7 +26,7 @@ class _AuthScreenState extends State<AuthScreen> {
     required String username,
     required String password,
     required bool isLogin,
-    required File image,
+    required File? image,
   }) async {
     final UserCredential userCredential;
 
@@ -48,7 +48,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
         final newUser = userCredential.user;
 
-        if (newUser != null) {
+        if (newUser != null && image != null) {
           final imageRef = FirebaseStorage.instance
               .ref()
               .child('user_images')
